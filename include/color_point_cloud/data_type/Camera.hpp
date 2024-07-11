@@ -138,11 +138,54 @@ namespace color_point_cloud {
             lidar_to_camera_matrix_ = Eigen::Matrix4d::Identity();
             lidar_to_camera_matrix_ = affine_lidar_to_camera_matrix.matrix();
 
+            std::cout << "lidar_to_camera_matrix_ " << lidar_to_camera_matrix_ << std::endl;
+
             is_transform_initialized_ = true;
+        }
+
+        Eigen::Vector2d project_lidar_to_camera(Eigen::Vector3d point_3d) {
+            const auto pt_2d = (point_3d.template head<2>() / point_3d.z()).eval();
+            const auto pt_d = pinhole_distort(pt_2d);
+
+            const auto& fx = camera_matrix_(0, 0);
+            const auto& fy = camera_matrix_(1, 1);
+            const auto& cx = camera_matrix_(0, 2);
+            const auto& cy = camera_matrix_(1, 2);
+
+            return {fx * pt_d(0) + cx, fy * pt_d(1) + cy};
+        }
+
+        Eigen::Vector2d pinhole_distort(const Eigen::Vector2d& pt) {
+            const auto& k1 = distortion_matrix_(0, 0);
+            const auto& k2 = distortion_matrix_(0, 1);
+            const auto& k3 = distortion_matrix_(0, 3);
+
+            const auto& p1 = distortion_matrix_(0, 4);
+            const auto& p2 = distortion_matrix_(0, 2);
+
+            const auto x2 = pt.x() * pt.x();
+            const auto y2 = pt.y() * pt.y();
+            const auto xy = pt.x() * pt.y();
+
+            const auto r2 = x2 + y2;
+            const auto r4 = r2 * r2;
+            const auto r6 = r2 * r4;
+
+            const auto r_coeff = 1.0 + k1 * r2 + k2 * r4 + k3 * r6;
+            const auto t_coeff1 = 2.0 * pt.x() * pt.y();
+            const auto t_coeff2 = r2 + 2.0 * x2;
+            const auto t_coeff3 = r2 + 2.0 * y2;
+
+            const auto x = r_coeff * pt.x() + p1 * t_coeff1 + p2 * t_coeff2;
+            const auto y = r_coeff * pt.y() + p1 * t_coeff3 + p2 * t_coeff1;
+
+            return Eigen::Vector2d(x, y);
+
         }
 
         void set_lidar_to_camera_projection_matrix() {
             lidar_to_camera_projection_matrix_ = projection_matrix_ * lidar_to_camera_matrix_.block<4, 4>(0, 0);
+            std::cout << "lidar_to_camera_projection_matrix_ " << lidar_to_camera_projection_matrix_ << std::endl;
         }
 
         std::string get_image_topic() {

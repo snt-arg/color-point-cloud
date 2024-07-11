@@ -1,12 +1,12 @@
 <launch>
     <arg name="timeout_sec" default="0.1"/>
-    <arg name="point_cloud_topic" default="/sensing/lidar/top/pointcloud_raw"/>
-    <arg name="point_cloud_frame_id" default="rs_helios_top"/>
+    <arg name="point_cloud_topic" default="/ouster/points"/>
+    <arg name="point_cloud_frame_id" default="os_lidar"/>
     <arg name="camera_topics"
-         default="[/sensing/camera/camera0/, /sensing/camera/camera1/, /sensing/camera/camera2/, /sensing/camera/camera3/]"/>
-    <arg name="image_type" default="0" description="0:RAW, 1:RECTIFIED"/>
-    <arg name="image_topic_last_name" default="image_raw"/>
-    <arg name="camera_info_topic_last_name" default="camera_info"/>
+         default="[/front_right,]"/>
+    <arg name="image_type" default="1" description="0:RAW, 1:RECTIFIED"/>
+    <arg name="image_topic_last_name" default="/image_raw"/>
+    <arg name="camera_info_topic_last_name" default="/camera_info"/>
 
     <node pkg="color_point_cloud" exec="color_point_cloud" name="color_point_cloud" output="screen">
         <param name="timeout_sec" value="$(var timeout_sec)"/>
@@ -16,6 +16,5 @@
         <param name="image_type" value="$(var image_type)"/>
         <param name="image_topic_last_name" value="$(var image_topic_last_name)"/>
         <param name="camera_info_topic_last_name" value="$(var camera_info_topic_last_name)"/>
-        <param from="$(var param_file)"/>
     </node>
 </launch>
