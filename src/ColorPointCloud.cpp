@@ -214,8 +214,8 @@ void ColorPointCloud::point_cloud_callback(
 
           //double x = point2d_transformed_camera[0];
           //double y = point2d_transformed_camera[1];
-          double x = pt_2i.x();
-          double y = pt_2i.y();
+          double x = pt_2i.y();
+          double y = pt_2i.x();
 
           if (x < 0 || x > pair.second->get_image_width() || y < 0 ||
               y > pair.second->get_image_height() ||
@@ -232,7 +232,7 @@ void ColorPointCloud::point_cloud_callback(
                 pair.second->get_cv_image().at<cv::Vec3b>(cv::Point(x, y));
             cv::Scalar color_scalar(color[0], color[1], color[2]);
 
-            iter_x[0] = point.x;
+            iter_x[0] = point.x;  
             iter_y[0] = point.y;
             iter_z[0] = point.z;
             iter_ring[0] = point.ring;
